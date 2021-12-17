@@ -1,7 +1,7 @@
 ---
 title: "Adding Unit Tests to Legacy C Code with GTest and FFF"
 date: 2021-11-29T16:43:12-05:00
-draft: true
+draft: false
 ---
 
 ## Table of Contents
@@ -44,7 +44,7 @@ I'll reference commits from the companion repo with note boxes in this format:
 
 {{% notice note %}}
 Follow along locally with: _some git command to run to check out the commit on your computer_  
-View online with: _some link to view the commit_  
+View online with: _some link to see the commit on Github_  
 {{% /notice %}}
 
 ### Some background on jargon used in this article
