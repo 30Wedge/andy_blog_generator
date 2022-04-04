@@ -1,9 +1,14 @@
-# How to Use
+# How to use the generator
 
 ### Testing
 In a terminal run `hugo server -D`.
  - Open the `localhost:1313` link it prints to the terminal.
  - Any changes to .md content files are updated in real time.
+
+### New page
+
+Run this to get a new post
+`hugo new posts/bare-metal-bringup/pt2.md`
 
 ### Publishing to Github pages
 In a terminal, run `hugo serve`. This produces the static site pages to the `public/` directory.
@@ -12,7 +17,7 @@ Double check that the `public/` directory is directed to the https://github.com/
 
 `cd public`, then commit all and push.
 
-# Interaction
+# Interaction with content
 
 Hi, this is where I'm hosting the source for my articles.
 
