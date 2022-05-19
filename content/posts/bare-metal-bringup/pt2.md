@@ -6,95 +6,92 @@ draft: true
 
 This post goes over the tools (software and hardware) to gather before we can get a minimal bare metal project running.
 
-I'll go over the pieces of hardware I'm using, then list out the essential software components, explain what they do,
-choose specific programs, then show how to find
-and install them.
+I'll list out the software and hardware components I'm using.
+
+For each of them, I'll
+ - Explain what the component does in general.
+ - Describe the specific component I'm using
+ - Then show how to find and install the component.
 
 ### Hardware
 
-Here's the two pieces of hardware I'll reference for the first part of this article.
+Here's the hardware compeonts I'll reference for the first part of this article. And really, its only one part!
 
 #### The Target Microcontroller -- the MSP430
 
-This Texas Instruments MSP430G2452 is the microcontroller that I have will run the code in this series.
-The picture above is just the chip, but its part of a larger TI launchpad devkit system.
-The launchpad provides a USB power supply, a debug probe (more in the next section), and some pin headers, buttons and
-LEDs that we can use to test our code quickly.
+This Texas Instruments MSP430G2452 is the microcontroller that I have will run the code in this series. 
 
-This is the oldest microcontroller I could find in my closet (the sticker on my box says 2012 - as I'm writing this in 2022).
+![attached_hw_debug_probe]( /posts/bare-metal-bringup/msp_430.jpg "Isolated microcontroller")
 
-For your understanding, the target hardware doesn't 100% matter.
+This little plastic and metal caterpillar-looking thing contains all of the circuitry that will run our software. 
+
+This chip can clip into a devkit (TI brands it as a "LaunchPad") to make it more convenient to develop on.
+I removed it from the devkit to take a picture, but for the rest of the project I'll keep it clipped in.  
+The devkit provides power to the micocontroller from the USB connector, pin headers, buttons, LEDS, and a built in debug
+probe (more on this in the next section).
+
+![attached_hw_debug_probe]( /posts/bare-metal-bringup/launchpad.jpg "Microcontroller plugged into the dev board")
+
+For those following along, the target hardware doesn't 100% matter.
 I'll still explain the steps to get a project building that should apply for most suppliers.
 
-Here's the bare bones checklist I ran through for this part: 
- - [ ] This board has the chip we're developing on it.
- - [ ] The target chip's IO pins exposed on the board.
- - [ ] Something is supplying power to the target chip:
-    - The board has some circuitry that uses power from the USB port to power the target chip. Its easy to take this for
-    granted.
- - [ ] We can access the debug interface to the chip. We'll need that to load code and interract with the chip (more on
+ You should be able to keep going with any target hardware as long as it checks these boxes
+  - [ ] You can prove the right power the part. (Just about any devkit with a USB cable checks this box)
+  - [ ] We can access the debug interface to the chip. We'll need this to load code and interract with the chip (more on
  what that means in the next section).
- - [ ] We have access to all the software tools specific to this part, whether the tools are open source or proprietary
+  - [ ] We have access to all the required software tools specific to this part, whether the tools are open source or proprietary
  (see the Software section).
 
-This LaunchPad checks all those boxes.  
+I bought this particular devkit on EBay a few years ago.  
+If there aren't any on EBay, you should be able to order one from the official [TI site](https://www.ti.com/tool/MSP-EXP430G2ET#included).
 
-Additionally, I chose this part deliberately as an example of a microcontroller that *could* need to be replaced in a
-professional project. 
-Over the span of a long project, microcontrollers can come and go, as cheaper designs come to market, as scope creep requires
-a higher powered core, or as parts are discontinued by the manufacturer. 
-The [TI
-website](https://www.ti.com/product/MSP430G2452?keyMatch=MSP430G2452&tisearch=search-everything&usecase=GPN#order-quality)
-shows that this part is still listed as "Active" (no plans to remove) and in supply. (The chip designer's website is one
-of the best online references to use at this stage of a project.) 
-This part is already pretty cheap at about $0.73 per chip, and in good supply but its still possible that it could get
-swapped out in the future.
+#### Debug Probe -- ... Also the MSP430 (?)
 
-For example, maybe your project isn't using all of the chip's resrouces, and it makes financial sense to swap it out for a
-newer, cheaper target like the MSP430FR2311 (at $0.52 per chip).
+You want to write software on your development machine, then program it onto your target microcontroller.
+The problem here is that while your development machine has a USB port to interface with hardware, your target
+microcontroller doesn't speak the USB protocol to allow programming or debugging.
+Your microcontroller probably supports a protocol like SWD (serial wire debug) or ISP (In System Programming) to allow
+software to be updated to it.
+See [this nice table](https://mtm.cba.mit.edu/2021/2021-10_microcontroller-primer/#programming-protocol-reference-table) for look at what the different protocols are and their connectors look like.
 
-For another example, its possible that the scope could exceed the chip's capabilities and require a
-higher powered ARM target like one from the STM32F0 series (at $1.30 per chip).
-
-The point is that *if* its possible for the target chip to change during a project, then a little upfront planning will
-help that transition a lot.
-
-Before moving on, if you don't know these terms in the context of embedded software, its good to learn them
- - **chip family**  
- - **architecture**  
- - **chip series**  
- - **embedded target** 
-
-#### Debug Probe -- Also the MSP430 (?)
-
-![attached_hw_debug_probe]( /hw_debug_probe.jpg "hw_debug_probe")
-
-You write software on your development machine, then load it onto your target microcontroller.
-The debug probe is the piece of hardware that interfaces the two machines together.
+The **debug probe** is the piece of hardware that interfaces between your development machine and microcontroller to
+allow for programming.
 Without one you won't be able to load any of the software that you write onto your target device, so its pretty
 important to have.
 
-Good thing that the MSP430 comes with a debug probe built in.
+Its a good thing that most devkits come with a debug probe built in.
+
+![attached_hw_debug_probe]( /posts/bare-metal-bringup/hw_debug_probe.jpg "hw_debug_probe")
 
 
-The green circled part contains some circuitry that makes up a debug probe.
+The circled part of the devkit board contains some circuitry that makes up a debug probe. So that's what I'll be using.
 
 Alternatively, you could use a general purpose debug probe like a Segger J-Link which is versitile enough to connect to
-all sorts of different targets in all sorts of different circuits.
+just about any target that supports a JTAG or SWD interface (or maybe others).
+Those can get quite expensive, and offer more features than we need for this project.
 
-#### Some hardware to validate the board -- like a cheap logic analyzer
+#### Optional -- Some exta hardware to validate your program -- like a cheap logic analyzer
 
-You'll write some software, load it onto your target, but then how will you know that it works?
-Ideally you'd like some observable output from your program to show you that its working.
+Note - for those following along you wont need this!  
+The launchpad includes some LEDs and buttons on the board -- that will suffice to validate that programming has
+succeded.
+
+
+As we go along, we'llY write some software, attempt to compile it, and load it onto the target. 
+The problem is knowing whether it works or not.
+You need some observable output from your program to show you that its working.
+
+Traditionally, you'd connect an LED to one of the GPIO pins and write simple code that blinks it on and off -- in
+jargon, that test code is called a "blinky". 
+
+I'm going to do something similar with the built-in LEDs, but I'll also connect a logic analyzer to the GPIO pin that's
+controlling the LED.
+
+A logic analyzer can graph the digital level of a GPIO pin over time. 
+I'm using this because it makes nicer pictures to include in a written post than an LED :) 
 
 This is among the cheapest logic analyzers I could find that I bought on
 [Sparkfun](https://www.sparkfun.com/products/18627) for about $20. 
-
-I'll use it ocasionally to verify that I've compiled code and loaded it onto the target correctly.
-Traditionally, you'd connect an LED to one of the GPIO pins and write simple code that blinks it on and off -- in
-jargon, that test code is called a "blinky". 
-I'm going to do something similar, but using the logic analyzer because its slightly less hardware to use, and it makes
-nicer pictures to include in a written post :) 
 
 ----
 
@@ -125,14 +122,56 @@ Not required - but very helpful.
     - Most often these are supplied by the vendor
     - Technically not necessary, but extremely helpful, and still useful in a minimal environment
 
+#### Cross Compiling Toolchain - gcc
+
+The word **toolchain** is a specific term for embedded - and it doesn't seem to have a standard definition. 
+I'll use it to mean "the collection of all of the programs that are used to convert the code we write into a format that the target
+microcontroller can execute."
+
+This sounds a lot like a compiler. And a compiler is one of the essential pieces of a toolchain. But there's also the
+assembler, the linker
+
+I'm using a version of **gcc** that supports MSP430 for this specific project. 
+ - explain what the tool is
+ - explain the specific program
+ - I'm using a **gcc** variant for the toolchain for this project.
+ - How to find and install
+
+gcc is an open source compiler collection, and there are all sorts of variants available that support different target
+architectures.
+
+I'm using the toolchain found on [TI's official site](https://www.ti.com/tool/MSP430-GCC-OPENSOURCE), and I decided to
+build the toolchain from source.
+That's a hassle worth another post.
+
+If you're following along on ubuntu, you should be able to get the appropriate toolchain from apt with `apt-get install
+gcc-msp430`.
+
 #### Debugger Client - gdb
+Sometimes the debugger is included as part of the toolchain -- and it is bundled with TI's toolchain, but I'm listing it separately here because its a more independent piece.
+
+Here, specifically, I'm referring to the **debugger client**.
+For developing software that runs on the same machine as the development machine, the debugger 
+
+I'm using **gdb** as my debugger for this project.
+
+Like gcc, gdb is open source and there are many variants to support different target architectures. Its worth noting
+that gdb and gcc are completely separate programs, despite the similar names.
+
+ - explain what the tool is
+ - explain the specific program
+ - How to find and install
+
 ##### Code Loader - the alternate option
 #### Debugger Server - mspdebug
 
+ - explain what the tool is
+ - explain the specific program
+ - How to find and install
+
+
 For an official supported version:
 `sudo apt install mspdebug`
-#### Cross Compiling Toolchain
-
 ##### Why is it and Why do we need it?
 The **toolchain** is the collection of programs that will convert your source code into an executable binary file.
 The **cross compiling** modifier indicates that the executable binary is in a format that's *different* from the machine
