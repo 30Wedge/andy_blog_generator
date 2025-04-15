@@ -7,8 +7,8 @@ In a terminal run `hugo server -D`.
 
 ### New page
 
-Run this to get a new post
-`hugo new posts/bare-metal-bringup/pt2.md`
+Run this from the root directory to start a new post:
+`hugo new content <path/to/new_post_file.md>`
 
 ### Publishing to Github pages
 In a terminal, run `hugo serve`. This produces the static site pages to the `public/` directory.
