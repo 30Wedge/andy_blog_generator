@@ -13,7 +13,7 @@ Run this from the root directory to start a new post:
 ### Publishing to Github pages
 In a terminal, run `hugo serve`. This produces the static site pages to the `public/` directory.
 
-Double check that the `public/` directory is directed to the https://github.com/30Wedge/30Wedge.github.io repo.
+Double check that the `public/` directory is symlinked to the https://github.com/30Wedge/30Wedge.github.io repo.
 
 `cd public`, then commit all and push.
 
